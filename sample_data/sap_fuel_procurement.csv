@@ -1,0 +1,7 @@
+company_code,plant_code,material_code,material_description,posting_date,quantity,unit,cost_center,vendor,document_number,currency,amount
+1000,DE01,DIESEL-001,Diesel fuel for backup generators,2025-01-12,500,L,CC-1001,FuelSupplier GmbH,4500001001,EUR,760
+1000,DE01,PETROL-002,Petrol for company vehicles,12.01.2025,120,GAL,CC-1002,AutoFuel GmbH,4500001002,EUR,430
+1000,IN01,DIESEL-001,Diesel for plant equipment,2025/01/18,800,L,,Local Fuel Co,4500001003,INR,72000
+1000,XX99,LPG-003,LPG cylinder purchase,2025-01-20,50,KG,CC-1003,Gas Vendor,4500001004,EUR,210
+1000,DE01,DIESEL-001,Diesel fuel bulk purchase,2025-01-23,999999,L,CC-1001,FuelSupplier GmbH,4500001005,EUR,1500000
+1000,DE02,UNKNOWN-999,Unknown material,2025-01-25,10,BAG,CC-1004,Unknown Vendor,4500001006,EUR,100

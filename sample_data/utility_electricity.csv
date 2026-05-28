@@ -1,0 +1,6 @@
+account_number,meter_id,facility_code,bill_start,bill_end,usage,usage_unit,demand_kw,tariff_name,total_cost,currency,estimated
+ACC-1001,MTR-001,DE01,2025-01-01,2025-01-31,42000,kWh,180,Industrial Standard,6200,EUR,false
+ACC-1002,MTR-002,DE02,2025-01-18,2025-02-17,72.4,MWh,220,Industrial Peak,10300,EUR,false
+ACC-1003,,IN01,2025-01-01,2025-01-31,31000,kWh,140,Commercial,280000,INR,true
+ACC-1004,MTR-004,XX99,2025-01-01,2025-01-31,-500,kWh,90,Correction Bill,-50,EUR,false
+ACC-1005,MTR-005,DE01,2025-01-01,2025-01-31,999999,kWh,500,Industrial Standard,100000,EUR,false
