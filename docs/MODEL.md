@@ -44,3 +44,18 @@ This gives the system both:
 Approved rows are locked by setting status to `locked` and storing `approved_at`, `approved_by`, and `locked_at`.
 
 Every important lifecycle action is represented as an AuditEvent.
+
+## Review API
+
+The prototype exposes API endpoints for the analyst workflow:
+
+- list normalized activities
+- filter by source, scope, status, facility, or warning flag
+- inspect raw source payload
+- edit normalized activity fields
+- approve and lock rows
+- reject rows
+- inspect audit events
+- view dashboard summary counts
+
+Approval immediately locks the row in this prototype. This is a deliberate simplification to make the audit boundary clear.
