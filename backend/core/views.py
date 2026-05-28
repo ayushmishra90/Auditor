@@ -2,11 +2,13 @@ from django.db.models import Count
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+from .ingestion import create_failed_ingestion_run, ingest_csv_file
 
 from .models import AuditEvent, IngestionRun, NormalizedActivity, SourceSystem, Tenant
 from .serializers import (
     AuditEventSerializer,
     IngestionRunSerializer,
+    IngestionUploadSerializer,
     NormalizedActivitySerializer,
     SourceSystemSerializer,
     TenantSerializer,
@@ -80,8 +82,13 @@ class NormalizedActivityViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(facility_code__icontains=facility_code)
 
         if warning:
-            queryset = queryset.filter(warning_flags__contains=[warning])
-
+            matching_ids = [
+                activity.id
+                for activity in queryset
+                if warning in (activity.warning_flags or [])
+            ]
+            queryset = queryset.filter(id__in=matching_ids)
+        
         return queryset
 
     def partial_update(self, request, *args, **kwargs):
@@ -90,6 +97,12 @@ class NormalizedActivityViewSet(viewsets.ModelViewSet):
         if activity.is_locked:
             return Response(
                 {"detail": "Locked activities cannot be edited."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if activity.status == NormalizedActivity.Status.REJECTED:
+            return Response(
+                {"detail": "Rejected activities cannot be edited."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -123,6 +136,12 @@ class NormalizedActivityViewSet(viewsets.ModelViewSet):
         if activity.is_locked:
             return Response(
                 {"detail": "Activity is already locked."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        if activity.status == NormalizedActivity.Status.REJECTED:
+            return Response(
+                {"detail": "Rejected activities cannot be approved."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -167,6 +186,12 @@ class NormalizedActivityViewSet(viewsets.ModelViewSet):
                 {"detail": "Locked activities cannot be rejected."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
+        if activity.status == NormalizedActivity.Status.REJECTED:
+            return Response(
+                {"detail": "Activity is already rejected."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         before_payload = NormalizedActivitySerializer(activity).data
 
@@ -188,6 +213,57 @@ class NormalizedActivityViewSet(viewsets.ModelViewSet):
         return Response(NormalizedActivitySerializer(activity).data)
 
 
+@api_view(["POST"])
+def ingest(request):
+    serializer = IngestionUploadSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    uploaded_file = serializer.validated_data["file"]
+    source_type = serializer.validated_data["source_type"]
+
+    try:
+        ingestion_run = ingest_csv_file(
+            uploaded_file=uploaded_file,
+            source_type=source_type,
+            user=request.user,
+        )
+    except ValueError as exc:
+        failed_run = create_failed_ingestion_run(
+            uploaded_file_name=uploaded_file.name,
+            source_type=source_type,
+            error_message=str(exc),
+            user=request.user,
+        )
+
+        return Response(
+            {
+                "detail": str(exc),
+                "ingestion_run": IngestionRunSerializer(failed_run).data,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    except Exception as exc:
+        failed_run = create_failed_ingestion_run(
+            uploaded_file_name=uploaded_file.name,
+            source_type=source_type,
+            error_message=f"Unexpected ingestion error: {str(exc)}",
+            user=request.user,
+        )
+
+        return Response(
+            {
+                "detail": f"Unexpected ingestion error: {str(exc)}",
+                "ingestion_run": IngestionRunSerializer(failed_run).data,
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    return Response(
+        IngestionRunSerializer(ingestion_run).data,
+        status=status.HTTP_201_CREATED,
+    )
+    
 @api_view(["GET"])
 def dashboard_summary(request):
     total_activities = NormalizedActivity.objects.count()

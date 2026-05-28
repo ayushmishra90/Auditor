@@ -8,6 +8,7 @@ from .views import (
     SourceSystemViewSet,
     TenantViewSet,
     dashboard_summary,
+    ingest,
 )
 
 router = DefaultRouter()
@@ -19,5 +20,6 @@ router.register("audit-events", AuditEventViewSet, basename="audit-event")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("ingest/", ingest, name="ingest"),
     path("dashboard-summary/", dashboard_summary, name="dashboard-summary"),
 ]

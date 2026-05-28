@@ -180,5 +180,22 @@ class NormalizedActivitySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Locked activities cannot be edited through the analyst workflow."
             )
+        
+        if instance and instance.status == NormalizedActivity.Status.REJECTED:
+            raise serializers.ValidationError(
+                "Rejected activities cannot be edited through the analyst workflow."
+            )
 
         return attrs
+
+class IngestionUploadSerializer(serializers.Serializer):
+    source_type = serializers.ChoiceField(
+        choices=SourceSystem.SourceType.choices,
+    )
+    file = serializers.FileField()
+
+    def validate_file(self, value):
+        if not value.name.lower().endswith(".csv"):
+            raise serializers.ValidationError("Only CSV files are supported.")
+
+        return value

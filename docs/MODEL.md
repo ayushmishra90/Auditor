@@ -59,3 +59,27 @@ The prototype exposes API endpoints for the analyst workflow:
 - view dashboard summary counts
 
 Approval immediately locks the row in this prototype. This is a deliberate simplification to make the audit boundary clear.
+
+## Ingestion pipeline
+
+The backend implements a CSV ingestion pipeline through:
+
+`POST /api/ingest/`
+
+The endpoint accepts:
+- `source_type`: `sap`, `utility`, or `travel`
+- `file`: CSV upload
+
+For each uploaded row, the system creates:
+- an IngestionRun
+- a RawRecord preserving the original source row
+- a NormalizedActivity for analyst review
+- an AuditEvent recording the creation or failure
+
+Rows with warnings are marked `needs_review`.
+Rows without warnings are marked `pending`.
+
+The current prototype supports:
+- SAP fuel/procurement-like CSV exports
+- utility electricity CSV exports
+- Concur-style travel CSV exports

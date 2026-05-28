@@ -1,0 +1,13 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Databases
+*.sqlite3
+
+# Frontend dependencies
+**/node_modules/
+dist/
+.env*
