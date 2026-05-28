@@ -1,6 +1,6 @@
 report_id,employee_id,expense_type,transaction_date,origin_airport,destination_airport,distance_km,hotel_nights,ground_distance_km,amount,currency,vendor
 RPT-001,E-1001,Airfare,2025-01-10,BLR,LHR,,,,930,USD,Lufthansa
-RPT-002,E-1002,Airfare,2025-01-12,DEL,BOM,1150,,,,180,USD,IndiGo
+RPT-002,E-1002,Airfare,2025-01-12,DEL,BOM,1150,,,180,USD,IndiGo
 RPT-003,E-1003,Hotel,2025-01-15,,,,3,,450,USD,Marriott
 RPT-004,E-1004,Taxi,2025-01-16,,,,,18,35,USD,Uber
 RPT-005,E-1005,Taxi,2025-01-18,,,,,,28,USD,Ola
